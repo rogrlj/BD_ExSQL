@@ -66,7 +66,6 @@ WHERE v.produto IS NULL
 SELECT p.descricao AS Descricao_Produto,
 		f.nome AS Nome_Fornecedor,
 		COUNT (v.produto) AS Count_Produto
-		--COUNT (v.produto) * v.quantidade AS Qtde_Vendida
 FROM venda v INNER JOIN produto p
 ON p.codigo = v.produto
 INNER JOIN fornecedor f
@@ -77,7 +76,6 @@ GROUP BY p.descricao, f.nome
 SELECT p.descricao AS Descricao_Produto,
 		f.nome AS Nome_Fornecedor,
 		COUNT (v.produto) AS Count_Produto
-		--COUNT (v.produto) * v.quantidade AS Qtde_Vendida
 FROM venda v, produto p, fornecedor f
 WHERE p.codigo = v.produto
 		AND f.ID = p.fornecedor
@@ -87,25 +85,25 @@ GROUP BY p.descricao, f.nome, v.quantidade
 
 --SQL2
 SELECT c.nome AS Nome_Cliente,
-		COUNT(v.produto) * v.quantidade AS Qtde_Comprada
+		COUNT(v.produto) AS Qtde
 FROM cliente c INNER JOIN venda v
 ON c.cpf = v.cliente
 GROUP BY c.nome, v.quantidade 
-ORDER BY Qtde_Comprada
+ORDER BY Qtde
 
 --SQL3
 SELECT c.nome AS Nome_Cliente,
-		COUNT(v.produto) * v.quantidade AS Qtde_Comprada
+		COUNT(v.produto) AS Qtde
 FROM cliente c, venda v
 WHERE c.cpf = v.cliente
 GROUP BY c.nome, v.quantidade 
-ORDER BY Qtde_Comprada
+ORDER BY Qtde
 
 --Descrição do produto e Quantidade de vendas do produto com menor valor do catálogo de produtos
 
 --SQL2
 SELECT p.descricao AS Descricao_Produto,
-		v.quantidade AS Quantidade_Vendas
+		COUNT(v.codigo) AS Qtde
 FROM produto p INNER JOIN venda v
 ON p.codigo = v.produto
 WHERE p.preco IN 
@@ -113,11 +111,11 @@ WHERE p.preco IN
 	SELECT MIN(preco)
 	FROM produto
 )
-GROUP BY p.descricao, v.quantidade
+GROUP BY p.descricao
 
 --SQL3
 SELECT p.descricao AS Descricao_Produto,
-		v.quantidade AS Quantidade_Vendas
+		COUNT(v.codigo) AS Qtde
 FROM produto p, venda v
 WHERE p.codigo = v.produto
 	AND p.preco IN 
@@ -125,7 +123,7 @@ WHERE p.codigo = v.produto
 	SELECT MIN(preco)
 	FROM produto
 )
-GROUP BY p.descricao, v.quantidade
+GROUP BY p.descricao
 
 
 --Nome do Fornecedor e Quantos produtos cada um fornece	
@@ -152,7 +150,7 @@ GROUP BY f.nome
 SELECT DISTINCT V.codigo AS Codigo_Compra,
 		c.nome AS Nome_Cliente,
 		CASE	
-			WHEN LEN(c.telefone) = 8 THEN
+			WHEN (LEN(c.telefone) = 8) THEN
 				SUBSTRING(c.telefone, 1, 4) + '-' +SUBSTRING(c.telefone, 5, 4)
 			ELSE
 				SUBSTRING(c.telefone, 1, 5) + '-' +SUBSTRING(c.telefone, 6, 4)
@@ -182,20 +180,20 @@ WHERE c.cpf = v.cliente
 SELECT SUBSTRING(c.cpf, 1, 3) + '.' + SUBSTRING(c.cpf, 4, 3) + '.' +
 		SUBSTRING(c.cpf, 7, 3) + '-' + SUBSTRING(c.cpf, 10, 2) AS CPF_Cliente,
 		c.nome AS Nome_Cliente,
-		COUNT(v.produto) * v.quantidade AS Qtde_Comprada
+		COUNT(v.produto) AS Qtde_Comprada
 FROM cliente c INNER JOIN venda v
 ON c.cpf = v.cliente
-GROUP BY c.cpf, c.nome, v.quantidade
+GROUP BY c.cpf, c.nome
 HAVING COUNT(v.produto) > 2
 
 --SQL3
 SELECT SUBSTRING(c.cpf, 1, 3) + '.' + SUBSTRING(c.cpf, 4, 3) + '.' +
 		SUBSTRING(c.cpf, 7, 3) + '-' + SUBSTRING(c.cpf, 10, 2) AS CPF_Cliente,
 		c.nome AS Nome_Cliente,
-		COUNT(v.produto) * v.quantidade AS Qtde_Comprada
+		COUNT(v.produto) AS Qtde_Comprada
 FROM cliente c, venda v
 WHERE c.cpf = v.cliente
-GROUP BY c.cpf, c.nome, v.quantidade
+GROUP BY c.cpf, c.nome
 HAVING COUNT(v.produto) > 2
 
 --Sem repetições, Código da venda, CPF do cliente, mascarado (XXX.XXX.XXX-XX), 
